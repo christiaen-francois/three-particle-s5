@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - particles - sprites</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="css/main.css">
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r122/three.min.js"></script>
+	</head>
+	<body>
+
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl particle sprites example<br/>
+			by Lunivers BRO!
+		</div>
+
+		<script>
+			let canvas = document.createElement("canvas");
+			let camera, scene, renderer, stats, parameters;
+			let mouseX = 0, mouseY = 0;
+			let stockWH = 0;
+			let mouse = {
+                    x: 0,
+                    y: 0,
+                    cameraX: 0,
+                    cameraY: 0
+                },
+                center = {
+                    x: 0,
+                    y: 0
+				};
+			let canvas_s = canvas.style
+
+			let windowHalfX = window.innerWidth / 2;
+			let windowHalfY = window.innerHeight / 2;
+
+			const materials = [];
+
+			init();
+			animate();
+
+			function init() {
+
+				(scene = new THREE.Scene).fog = new THREE.FogExp2(10842,.001);
+                var t = window.innerWidth
+                  , e = window.innerHeight;
+                (camera = new THREE.PerspectiveCamera(75,t / e,1,2e3)).position.set(0, 0, 1e3)
+
+				renderer = new THREE.WebGLRenderer({
+					alpha: !1,
+					antialias: !1,
+					precision: "lowp",
+					canvas: canvas
+				});
+				Math.min(2, window.devicePixelRatio);
+				renderer.setPixelRatio( 1 );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor(10842, 1);
+				
+
+				wrap = new THREE.Group,
+				scene.add(wrap);
+
+				for (var i, 
+					geometry = new THREE.BufferGeometry, 
+					vertices = [], 
+					textureLoader = new THREE.TextureLoader, 
+					sprite1 = textureLoader.load("img/tex1.png"), 
+					sprite2 = textureLoader.load("img/tex2.png"), 
+					sprite3 = textureLoader.load("img/tex3.png"), 
+					c = 0; 
+					c < 30; 
+					c++) {
+					var x = Math.random(130, 800) * 2000 - 1000
+						, y = Math.random(130, 800) * 2000 - 1000
+						, z = Math.random(130, 800) * 2000 - 1000;
+					
+					vertices.push(x, y, z)
+				}
+				geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices,3));
+				parameters = [[sprite1, .3], [sprite2, .3], [sprite3, .3], [sprite1, .15], [sprite2, .15]];
+				particlesArr = [];
+				materialsArr = [];
+
+				for (var p = 0, v = parameters.length; p < v; p++) {
+					var sprite = parameters[p][0], 
+					size = parameters[p][1];
+					materialsArr[p] = new THREE.PointsMaterial({
+						size: 100 * size,
+						map: sprite,
+						blending: THREE.AdditiveBlending,
+						depthTest: !1,
+						transparent: !0
+					});
+					var particles = new THREE.Points(geometry,materialsArr[p]);
+					particles.rotation.x = Math.random(-180, 180) * (Math.PI/180),
+					particles.rotation.y = Math.random(-180, 180) * (Math.PI/180),
+					particles.rotation.z = Math.random(-180, 180) * (Math.PI/180),
+					wrap.add(particles),
+					particlesArr.push(particles);
+					//scene.add( particles );
+				}
+
+				bg_scene = new THREE.Scene;
+				bg_camera = new THREE.Camera;
+				camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,.1,1e3);
+				camera.position.z = 0;
+				bg_texture = THREE.ImageUtils.loadTexture("img/bg_most.jpg", {});
+
+				i = new THREE.MeshLambertMaterial({
+					map: bg_texture
+				});
+				bg_mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2,0),i);
+				bg_mesh.material.depthTest = !1;
+				bg_mesh.material.depthWrite = !1;
+				bg_scene.add(bg_camera);
+				bg_scene.add(bg_mesh);
+				bg_light = new THREE.SpotLight(16777215,2,100,Math.PI / 6,.4);
+				bg_scene.add(bg_light);
+
+				document.body.appendChild( renderer.domElement );
+
+				//document.body.style.touchAction = 'none';
+				document.body.addEventListener( 'mousemove', onPointerMove, false );
+
+				//
+				onWindowResize();
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				ww = window.innerWidth,
+                wh = window.innerHeight,
+                center.x = .5 * ww,
+                center.y = .5 * wh,
+				canvas_s.height = wh + "px",
+                camera && (camera.aspect = ww / wh,
+                camera.updateProjectionMatrix(),
+                renderer.setSize(ww, wh));
+
+			}
+
+			function onPointerMove( event ) {
+
+				if ( event.isPrimary === false ) return;
+
+				//mouseX = event.clientX - windowHalfX;
+				//mouseY = event.clientY - windowHalfY;
+
+				mouse.x = (event.clientX - center.x) / center.x,
+				mouse.y = (event.clientY - center.y) / center.y,
+                mouse.cameraX = 200 * mouse.x,
+                mouse.cameraY = 100 * mouse.y,
+                mouse.lightX = -mouse.x,
+                mouse.lightY = mouse.y
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				var time = 1e-5 * Date.now();
+                renderer.autoClear = !1;
+                renderer.clear();
+                bg_light.position.copy(new THREE.Vector3(mouse.lightX,mouse.lightY,3));
+                renderer.render(bg_scene, bg_camera);
+                camera.position.x += .05 * (mouse.cameraX - camera.position.x);
+				camera.position.y += .05 * (-mouse.cameraY - camera.position.y);
+				// Cette ligne m'emmerde grave !
+                camera.lookAt(wrap.position);
+                this.particlesArr.forEach((function(e, i) {
+                    e.rotation.y = time * (i < 4 ? i + 1 : -(i + 1))
+                }
+                )),
+                renderer.render(scene, camera)
+			}
+
+		</script>
+	</body>
+</html>
