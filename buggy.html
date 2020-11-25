@@ -44,7 +44,7 @@
 				(scene = new THREE.Scene).fog = new THREE.FogExp2(10842,.001);
                 var t = window.innerWidth
                   , e = window.innerHeight;
-                (camera = new THREE.PerspectiveCamera(75,t / e,1,2e3)).position.set(0, 0, 1e3)
+                (camera = new THREE.PerspectiveCamera(75,t / e,1,3000)).position.set(0, 0, 2000)
 
 				renderer = new THREE.WebGLRenderer({
 					alpha: !1,
@@ -69,7 +69,7 @@
 					sprite2 = textureLoader.load("img/tex2.png"), 
 					sprite3 = textureLoader.load("img/tex3.png"), 
 					c = 0; 
-					c < 30; 
+					c < 50; 
 					c++) {
 					var x = Math.random(130, 800) * 2000 - 1000
 						, y = Math.random(130, 800) * 2000 - 1000
@@ -93,9 +93,9 @@
 						transparent: !0
 					});
 					var particles = new THREE.Points(geometry,materialsArr[p]);
-					particles.rotation.x = Math.random(-180, 180) * (Math.PI/180),
-					particles.rotation.y = Math.random(-180, 180) * (Math.PI/180),
-					particles.rotation.z = Math.random(-180, 180) * (Math.PI/180),
+					particles.rotation.x = Math.random(-180, 180) * 6,
+					particles.rotation.y = Math.random(-180, 180) * 6,
+					particles.rotation.z = Math.random(-180, 180) * 6,
 					wrap.add(particles),
 					particlesArr.push(particles);
 					//scene.add( particles );
@@ -103,8 +103,8 @@
 
 				bg_scene = new THREE.Scene;
 				bg_camera = new THREE.Camera;
-				camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,.1,1e3);
-				camera.position.z = 0;
+				//camera = new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight,.1,1000);
+				//camera.position.z = 0;
 				bg_texture = THREE.ImageUtils.loadTexture("img/bg_most.jpg", {});
 
 				i = new THREE.MeshLambertMaterial({
@@ -133,8 +133,8 @@
 
 				ww = window.innerWidth,
                 wh = window.innerHeight,
-                center.x = .5 * ww,
-                center.y = .5 * wh,
+                center.x = ww / 2,
+                center.y = wh / 2,
 				canvas_s.height = wh + "px",
                 camera && (camera.aspect = ww / wh,
                 camera.updateProjectionMatrix(),
@@ -146,11 +146,9 @@
 
 				if ( event.isPrimary === false ) return;
 
-				//mouseX = event.clientX - windowHalfX;
-				//mouseY = event.clientY - windowHalfY;
-
 				mouse.x = (event.clientX - center.x) / center.x,
 				mouse.y = (event.clientY - center.y) / center.y,
+				console.log([mouse.y, mouse.x]);
                 mouse.cameraX = 200 * mouse.x,
                 mouse.cameraY = 100 * mouse.y,
                 mouse.lightX = -mouse.x,
